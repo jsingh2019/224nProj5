@@ -125,7 +125,7 @@ elif args.function == 'finetune':
     #now to use trainer. Again using code from play_char as background
     traineR = trainer.Trainer(model, finetune_dataset, None, finetuneNoPretrain)
     traineR.train()
-    torch.save(model.state_dict(), args.reading_params_path)
+    torch.save(model.state_dict(), args.writing_params_path)
     
     
     
