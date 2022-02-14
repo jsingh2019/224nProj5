@@ -123,9 +123,9 @@ elif args.function == 'finetune':
                                                warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, 
                                                num_workers=4)
     #now to use trainer. Again using code from play_char as background
-    trainer = Trainer(model, finetune_dataset, None, finetuneNoPretrain)
-    trainer.train()
-    torch.save(trainer.state_dict(), args.reading_params_path)
+    traineR = trainer.Trainer(model, finetune_dataset, None, finetuneNoPretrain)
+    traineR.train()
+    torch.save(traineR.state_dict(), args.reading_params_path)
     
     
     
