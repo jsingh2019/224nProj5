@@ -2,6 +2,7 @@ import random
 import torch
 from torch.utils.data import Dataset
 import argparse
+import numpy as np
 
 """
 The input-output pairs (x, y) of the NameDataset are of the following form:
@@ -167,9 +168,82 @@ class CharCorruptionDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        # TODO [part e]: see spec above
-        raise NotImplementedError
+        '''
+        0. Use the idx argument of __getitem__ to retrieve the element of self.data
+        at the given index. We'll call the resulting data entry a document.
+        '''
+        originalDoc = self.data[idx]
+        '''
+        1. Randomly truncate the document to a length no less than 4 characters,
+        and no more than int(self.block_size*7/8) characters.
+        
+        - IMPORTANT: You are free to decide how to perform this random truncation, but
+        make sure that the length is picked _randomly_ (every possible length from 4
+        to int(self.block_size*7/8) has a chance of being picked) for full credit.
+        '''
+        newLen = random.randint(4, int(self.block_size*7/8))
+        document = originalDoc[:newLen] if newLen <= len(originalDoc) else originalDoc
+        '''
+        2. Now, break the (truncated) document into three substrings:
 
+            [prefix] [masked_content] [suffix]
+
+          In other words, choose three strings prefix, masked_content and suffix
+            such that prefix + masked_content + suffix = [the original document].
+          The length of [masked_content] should be random, and 1/4 the length of the
+            truncated document on average.
+
+        - IMPORTANT: You are free to decide how to perform this operation, but
+        make sure that the length is picked _randomly_ (has a chance of being more or
+        less than 1/4 the length of the truncated document) for full credit.
+        '''
+        maskLen = int(np.random.normal(0.25*len(document), 0.05*len(document)))
+        #print("document len" + str(len(document)))
+        #print("mask len" + str(maskLen))
+        #can change std dev to change variance of doc length               
+        preLen = random.randint(1, len(document)-maskLen-1)
+        #print("preLen" + str(preLen))
+        suffixIdx = preLen + maskLen
+        #print("suffLen" + str(len(document)-suffixIdx))
+        prefix = document[ : preLen]
+        masked_content = document[preLen : suffixIdx]
+        suffix = document[suffixIdx : ]
+        '''
+        3. Rearrange these substrings into the following form:
+
+            [prefix] MASK_CHAR [suffix] MASK_CHAR [masked_content] [pads]
+
+          This resulting string, denoted masked_string, serves as the output example.
+          Here MASK_CHAR is the masking character defined in Vocabulary Specification,
+            and [pads] is a string of repeated PAD_CHAR characters chosen so that the
+            entire string is of length self.block_size.
+          Intuitively, the [masked_content], a string, is removed from the document and
+            replaced with MASK_CHAR (the masking character defined in Vocabulary
+            Specification). After the suffix of the string, the MASK_CHAR is seen again,
+            followed by the content that was removed, and the padding characters.
+        '''
+        masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content
+        for i in range(self.block_size - len(masked_string)):
+            masked_string += self.PAD_CHAR
+        '''
+        4. We now use masked_string to construct the input and output example pair. To
+        do so, simply take the input string to be masked_string[:-1], and the output
+        string to be masked_string[1:]. In other words, for each character, the goal is
+        to predict the next character in the masked string.
+        '''
+        inputstr = masked_string[:-1]
+        outputstr = masked_string[1:]
+        '''
+        5. Making use of the vocabulary that you defined, encode the resulting input
+        and output strings as Long tensors and return the resulting data point.
+        '''
+        inputString = torch.tensor([self.stoi[s] for s in inputstr], dtype=torch.int64)
+        outputString = torch.tensor([self.stoi[s] for s in outputstr], dtype=torch.int64)
+        
+        return inputString, outputString
+        # TODO [part e]: see spec above
+        
+        
 """
 Code under here is strictly for your debugging purposes; feel free to modify
 as desired.

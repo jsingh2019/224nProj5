@@ -81,7 +81,14 @@ if args.function == 'pretrain':
     #     warmup_tokens=512*20
     #     final_tokens=200*len(pretrain_dataset)*block_size
     #     num_workers=4
-    raise NotImplementedError
+    
+    pretrainConf = trainer.TrainerConfig(max_epochs=650, batch_size=128, learning_rate=6e-3, lr_decay=True, warmup_tokens=512*20,
+                                         final_tokens=200*len(pretrain_dataset)*block_size, num_workers=4)
+    
+    traineR = trainer.Trainer(model, pretrain_dataset, None, pretrainConf)
+    traineR.train()
+    torch.save(model.state_dict(), args.writing_params_path)
+    
 elif args.function == 'finetune':
     assert args.writing_params_path is not None
     assert args.finetune_corpus_path is not None
@@ -113,17 +120,26 @@ elif args.function == 'finetune':
     #         warmup_tokens=512*20
     #         final_tokens=200*len(pretrain_dataset)*block_size
     #         num_workers=4
-    
-    #part c: finetuning WITHOUT a pretrained model
     #code adapted from lines 45 and 46
     finetuningCorpusText = open(args.finetune_corpus_path).read()
     finetune_dataset = dataset.NameDataset(pretrain_dataset, finetuningCorpusText)
-    #use trainer class and input these vars
-    finetuneNoPretrain = trainer.TrainerConfig(max_epochs=75, batch_size=256, learning_rate=6e-4, lr_decay=True, 
-                                               warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, 
-                                               num_workers=4)
+    
+    if args.redaing_param_path is not None: #part e - with pretrain model
+        #from lines 151 and 152
+        model.load_state_dict(torch.load(args.reading_params_path))
+        model.to(device)
+        #copy of line 137
+        finetuneConf = trainer.TrainerConfig(max_epochs=10, batch_size=256, learning_rate=6e-4, lr_decay=True,
+                                                   warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, 
+                                                   num_workers=4)
+    else: #part c: finetuning WITHOUT a pretrained model
+        #use trainer class and input these vars
+        finetuneConf = trainer.TrainerConfig(max_epochs=75, batch_size=256, learning_rate=6e-4, lr_decay=True,
+                                                   warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, 
+                                                   num_workers=4)
+  
     #now to use trainer. Again using code from play_char as background
-    traineR = trainer.Trainer(model, finetune_dataset, None, finetuneNoPretrain)
+    traineR = trainer.Trainer(model, finetune_dataset, None, finetuneConf)
     traineR.train()
     torch.save(model.state_dict(), args.writing_params_path)
     
