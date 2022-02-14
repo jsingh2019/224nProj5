@@ -116,8 +116,8 @@ elif args.function == 'finetune':
     
     #part c: finetuning WITHOUT a pretrained model
     #code adapted from lines 45 and 46
-    finetuningCorpusText = open(args.pretrain_corpus_path).read()
-    finetune_dataset = dataset.NameDataset(finetuningCorpusText)
+    finetuningCorpusText = open(args.finetune_corpus_path).read()
+    finetune_dataset = dataset.NameDataset(pretrain_dataset, finetuningCorpusText)
     #use trainer class and input these vars
     finetuneNoPretrain = trainer.TrainerConfig(max_epochs=75, batch_size=256, learning_rate=6e-4, lr_decay=True, 
                                                warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size, 
