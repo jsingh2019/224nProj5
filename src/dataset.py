@@ -197,7 +197,8 @@ class CharCorruptionDataset(Dataset):
         make sure that the length is picked _randomly_ (has a chance of being more or
         less than 1/4 the length of the truncated document) for full credit.
         '''
-        maskLen = int(np.random.normal(0.25*len(document), 0.01*len(document)))
+        #maskLen = int(np.random.normal(0.25*len(document), 0.01*len(document)))
+        maskLen = int(0.25*len(document))
         #print("document len" + str(len(document)))
         #print("mask len" + str(maskLen))
         #can change std dev to change variance of doc length               
