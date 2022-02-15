@@ -125,7 +125,7 @@ elif args.function == 'finetune':
     finetuningCorpusText = open(args.finetune_corpus_path).read()
     finetune_dataset = dataset.NameDataset(pretrain_dataset, finetuningCorpusText)
     
-    if args.redaing_param_path is not None: #part e - with pretrain model
+    if args.reading_param_path is not None: #part e - with pretrain model
         #from lines 151 and 152
         model.load_state_dict(torch.load(args.reading_params_path))
         model.to(device)
