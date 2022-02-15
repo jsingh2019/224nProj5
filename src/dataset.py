@@ -202,8 +202,8 @@ class CharCorruptionDataset(Dataset):
         #print("document len" + str(len(document)))
         #print("mask len" + str(maskLen))
         #can change std dev to change variance of doc length 
-        topLenPre = len(document) - maskLen - 1
-        preLen = random.randint(1, topLenPre)
+        
+        preLen = len(document) - random.randint(maskLen, len(document)-1)
         #preLen = int(0.25*len(document))
         #print("preLen" + str(preLen))
         suffixIdx = preLen + maskLen
