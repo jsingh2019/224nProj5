@@ -23,6 +23,7 @@ class GPTConfig:
     resid_pdrop = 0.1
     attn_pdrop = 0.1
     additive = False
+    casual = True
 
     def __init__(self, vocab_size, block_size, **kwargs):
         self.vocab_size = vocab_size
@@ -45,8 +46,10 @@ class Block(nn.Module):
         self.ln2 = nn.LayerNorm(config.n_embd)
         if config.additive:
             self.attn = attention.AdditiveSelfAttention(config)
-        else:
+        elif config.casual:
             self.attn = attention.CausalSelfAttention(config)
+        else:
+            self.attn = attention.SynthesizerAttention(config)
         self.mlp = nn.Sequential(
             nn.Linear(config.n_embd, 4 * config.n_embd),
             nn.GELU(),
