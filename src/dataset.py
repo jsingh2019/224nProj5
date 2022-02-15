@@ -207,7 +207,7 @@ class CharCorruptionDataset(Dataset):
         print(maskLen)
         print(". ")
         print(len(document)-1)
-        preLen = len(document) - random.randint(maskLen, len(document)-1)
+        preLen = random.randint(1, len(document)-1-maskLen)
         #preLen = int(0.25*len(document))
         #print("preLen" + str(preLen))
         suffixIdx = preLen + maskLen
