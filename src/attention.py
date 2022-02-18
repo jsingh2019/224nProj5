@@ -97,10 +97,8 @@ class SynthesizerAttention(nn.Module):
         synVar = self.w1(x).view(B, T, self.n_head, C // self.n_head).transpose(1, 2)
         #ReLU
         reluComp = F.relu(synVar)
-        #*B_i
-        att = reluComp @ (self.w2.unsqueeze(0).unsqueeze(0)[..., :T])
-        #+b_2
-        inSoftMax = att + self.b2[..., :T]
+        #*B_i + b_2
+        inSoftMax = (reluComp @ (self.w2[..., :T])) + self.b2[..., :T]
         #PARTS CHANGED ENDS HERE
                 
         #these parts remain the same - softmax and multiplying.
